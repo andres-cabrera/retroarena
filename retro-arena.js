@@ -5,6 +5,9 @@ const restartButton = document.getElementById('restart-button')
 restartGameSection.style.display = 'none'
 
 const selectChampionSection = document.getElementById('select-champion')
+const searchOpponentSection = document.getElementById('search-opponent')
+const cancelSearchButton = document.getElementById('cancel-search')
+const timerText = document.getElementById('timer-text')
 const playerChampionSpan = document.getElementById('player-champion')
 
 const enemyChampionSpan = document.getElementById('enemy-champion')
@@ -20,6 +23,11 @@ const attacksContainer = document.getElementById('attacksContainer')
 
 const seeMapSection = document.getElementById('see-map')
 const map = document.getElementById('map')
+
+// API Base URL - Detectar automáticamente en producción
+const API_BASE = window.location.hostname === 'localhost' 
+  ? `http://localhost:8080`
+  : `${window.location.protocol}//${window.location.host}`
 
 let playerId = null
 let enemyId = null
@@ -47,6 +55,9 @@ let playerLifes = 3
 let enemyLifes = 3
 let canvas = map.getContext("2d")
 let interval
+let searchInterval = null
+let searchTimeRemaining = 120
+let hasFoundOpponent = false
 let mapBackground = new Image()
 mapBackground.src = './assets/map-lava.jpg'
 let heightWeNeed
@@ -92,7 +103,7 @@ class Champion {
 
 let warrior = new Champion('Warrior', './assets/warrior1.gif', 5, './assets/warrior1.gif')
 
-let mage = new Champion('Mage', './assets/mage1.gif', 5, 'assets/mage1.gif')
+let mage = new Champion('Mage', './assets/mage1.gif', 5, './assets/mage1.gif')
 
 let rogue = new Champion('Rogue', './assets/rogue1.gif', 5, './assets/rogue1.gif')
 
@@ -152,12 +163,18 @@ function startGame() {
     playerChampionButton.addEventListener('click', selectPlayerChampion)
 
     restartButton.addEventListener('click', restartGame)
+    
+    cancelSearchButton.addEventListener('click', () => {
+        hasFoundOpponent = true // Prevenir que intente reconectar
+        if (searchInterval) clearInterval(searchInterval)
+        location.reload()
+    })
 
     joinGame()
 }
 
 function joinGame() {
-    fetch("http://192.168.1.2:8080/join")
+    fetch(`${API_BASE}/join`)
         .then(function (res) {
             if (res.ok) {
                 res.text()
@@ -166,6 +183,53 @@ function joinGame() {
                         playerId = answer
                     })
             }
+        })
+}
+
+function startSearchingOpponent() {
+    // Actualizar el temporizador cada segundo
+    const countdownInterval = setInterval(() => {
+        searchTimeRemaining--
+        timerText.innerHTML = `Time left: ${searchTimeRemaining}s`
+
+        if (searchTimeRemaining <= 0) {
+            clearInterval(countdownInterval)
+            if (searchInterval) clearInterval(searchInterval)
+            if (!hasFoundOpponent) {
+                alert('Time expired. No opponent found. Please try again.')
+                location.reload()
+            }
+        }
+    }, 1000)
+
+    // Buscar oponentes cada 500ms
+    searchInterval = setInterval(() => {
+        searchForAvailableOpponent()
+    }, 500)
+}
+
+function searchForAvailableOpponent() {
+    fetch(`${API_BASE}/opponents?playerId=${playerId}`)
+        .then(function (res) {
+            if (res.ok) {
+                res.json()
+                    .then(function (data) {
+                        if (data.opponents && data.opponents.length > 0) {
+                            hasFoundOpponent = true
+                            if (searchInterval) clearInterval(searchInterval)
+                            enemyId = data.opponents[0].id
+                            
+                            // Proceder a cargar el mapa
+                            extractAttacks(playerChampion)
+                            searchOpponentSection.style.display = 'none'
+                            seeMapSection.style.display = 'flex'
+                            startMap()
+                        }
+                    })
+            }
+        })
+        .catch(function (error) {
+            console.log('Error searching for opponent:', error)
         })
 }
 
@@ -189,13 +253,35 @@ function selectPlayerChampion() {
 
     selectChampion(playerChampion)
 
-    extractAttacks(playerChampion)
-    seeMapSection.style.display = 'flex'
-    startMap()
+    // Mostrar pantalla de búsqueda con countdown
+    searchOpponentSection.style.display = 'flex'
+    searchOpponentSection.style.flexDirection = 'column'
+    searchOpponentSection.style.justifyContent = 'center'
+    searchOpponentSection.style.alignItems = 'center'
+    searchTimeRemaining = 10
+    hasFoundOpponent = false
+    
+    // Iniciar countdown de 10 segundos y luego ir al mapa
+    let countdownTime = 10
+    timerText.innerHTML = `Time left: ${countdownTime}s`
+    
+    const countdownInterval = setInterval(() => {
+        countdownTime--
+        timerText.innerHTML = `Time left: ${countdownTime}s`
+        
+        if (countdownTime <= 0) {
+            clearInterval(countdownInterval)
+            // Entrar al mapa como jugador individual
+            searchOpponentSection.style.display = 'none'
+            extractAttacks(playerChampion)
+            seeMapSection.style.display = 'flex'
+            startMap()
+        }
+    }, 1000)
 }
 
 function selectChampion(playerChampion) {
-    fetch(`http://192.168.1.2:8080/champion/${playerId}`, {
+    fetch(`${API_BASE}/champion/${playerId}`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -261,7 +347,7 @@ function attackSequence() {
 }
 
 function sendAttacks() {
-    fetch(`http://192.168.1.2:8080/champion/${playerId}/attacks`, {
+    fetch(`${API_BASE}/champion/${playerId}/attacks`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -271,11 +357,20 @@ function sendAttacks() {
         })
     })
 
-    interval = setInterval(getAttacks, 50)
+    let attemptCount = 0
+    const maxAttempts = 100
+    interval = setInterval(() => {
+        if (attemptCount >= maxAttempts) {
+            clearInterval(interval)
+            return
+        }
+        getAttacks()
+        attemptCount++
+    }, 50)
 }
 
 function getAttacks() {
-    fetch(`http://192.168.1.2:8080/champion/${enemyId}/attacks`)
+    fetch(`${API_BASE}/champion/${enemyId}/attacks?playerId=${playerId}`)
         .then(function (res) {
             if (res.ok) {
                 res.json()
@@ -330,37 +425,36 @@ function combat() {
         if (playerAttack[index] === enemyAttack[index]) {
             bothOpponentsIndex(index, index)
             createMessage("TIE")
-            playerLifeSpan.innerHTML = playerWins
         } else if (playerAttack[index] === 'FIRE' && enemyAttack[index] === 'EARTH') {
             bothOpponentsIndex(index, index)
             createMessage("YOU WIN")
             playerWins++
-            playerLifeSpan.innerHTML = playerWins
         } else if (playerAttack[index] === 'EARTH' && enemyAttack[index] === 'WATER') {
             bothOpponentsIndex(index, index)
             createMessage("YOU WIN")
             playerWins++
-            playerLifeSpan.innerHTML = playerWins
         } else if (playerAttack[index] === 'WATER' && enemyAttack[index] === 'FIRE') {
             bothOpponentsIndex(index, index)
             createMessage("YOU WIN")
             playerWins++
-            playerLifeSpan.innerHTML = playerWins
         } else {
             bothOpponentsIndex(index, index)
             createMessage("YOU LOSE")
             enemyWins++
-            enemyLifeSpan.innerHTML = enemyWins
         }
     }
 
+    playerLifeSpan.innerHTML = playerWins
+    enemyLifeSpan.innerHTML = enemyWins
+    
+    resetAttackButtons()
     checkLife()
 }
 
 function checkLife() {
     if (playerWins === enemyWins) {
         createFinalMessage("This was a tie!")
-    } else if (playerLifes > enemyWins) {
+    } else if (playerWins > enemyWins) {
         createFinalMessage("Congrats! You win!")
     } else {
         createFinalMessage("Sorry, you lose :(")
@@ -378,6 +472,13 @@ function createMessage(score) {
 
     playerAttacks.appendChild(newPlayerAttack)
     enemyAttacks.appendChild(newEnemyAttack)
+}
+
+function resetAttackButtons() {
+    buttons.forEach((button) => {
+        button.style.background = '#11468f'
+        button.disabled = false
+    })
 }
 
 function createFinalMessage(finalScore) {
@@ -415,7 +516,7 @@ function paintCanvas() {
 }
 
 function sendPosition(x, y) {
-    fetch(`http://192.168.1.2:8080/champion/${playerId}/position`, {
+    fetch(`${API_BASE}/champion/${playerId}/position`, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -476,14 +577,34 @@ function keyPressed(event) {
     switch (event.key) {
         case 'ArrowUp':
             moveUp()
+            event.preventDefault()
             break
         case 'ArrowDown':
             moveDown()
+            event.preventDefault()
             break
         case 'ArrowLeft':
             moveLeft()
+            event.preventDefault()
             break
         case 'ArrowRight':
+            moveRight()
+            event.preventDefault()
+            break
+        case 'w':
+        case 'W':
+            moveUp()
+            break
+        case 'a':
+        case 'A':
+            moveLeft()
+            break
+        case 's':
+        case 'S':
+            moveDown()
+            break
+        case 'd':
+        case 'D':
             moveRight()
             break
         default:
@@ -503,10 +624,9 @@ function startMap() {
     window.addEventListener('keyup', stopMovement)
 }
 
-function getChampionObject() {
+function getChampionObject(championName) {
     for (let i = 0; i < champions.length; i++) {
-        ;
-        if (playerChampion === champions[i].name) {
+        if (championName === champions[i].name) {
             return champions[i]
         }
     }
@@ -518,19 +638,15 @@ function checkCollision(enemy) {
     const enemyRight = enemy.x + enemy.width
     const enemyLeft = enemy.x
 
-    const championUp =
-        playerChampionObject.y
-    const championDown =
-        playerChampionObject.y + playerChampionObject.height
-    const chamionRight =
-        playerChampionObject.x + playerChampionObject.width
-    const championLeft =
-        playerChampionObject.x
+    const championUp = playerChampionObject.y
+    const championDown = playerChampionObject.y + playerChampionObject.height
+    const championRight = playerChampionObject.x + playerChampionObject.width
+    const championLeft = playerChampionObject.x
 
     if (
         championDown < enemyUp ||
         championUp > enemyDown ||
-        chamionRight < enemyLeft ||
+        championRight < enemyLeft ||
         championLeft > enemyRight
     ) {
         return

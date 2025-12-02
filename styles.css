@@ -1,67 +1,211 @@
 @import url("https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@300&family=Press+Start+2P&family=Squada+One&display=swap");
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: "Press Start 2P", sans-serif;
-    background-image: url("./assets/rpg-background.jpg");
+    background-color: #1a0000;
+    background-image: linear-gradient(135deg, #8f1111 0%, #5a0a0a 100%);
+    min-height: 100vh;
     padding: 50px;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
+    z-index: 1;
+    pointer-events: none;
+}
+
+section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    padding-top: 40px;
 }
 
 #select-champion {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    animation: fadeIn 0.8s ease-in;
+    justify-content: flex-start;
+    padding-top: 60px;
+}
+
+#search-opponent {
+    animation: sectionFade 0.6s ease-in;
+}
+
+#see-map {
+    animation: sectionFade 0.6s ease-in;
+    padding-bottom: 120px;
+}
+
+#select-attack {
+    animation: sectionFade 0.6s ease-in;
 }
 
 .game-title {
     color: #8f1111;
     background-color: #ffbb00;
     font-size: 32px;
-    font-family: "Press Start 2P", cursive;
-    padding: 2px;
+    font-family: "Press Start 2P", sans-serif;
+    padding: 20px 30px;
     text-align: center;
+    border-radius: 10px;
+    text-shadow: 4px 4px #5a0a0a;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 
+                inset 0 -4px 8px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(255, 187, 0, 0.4);
+    animation: titleGlow 2s ease-in-out infinite;
+    letter-spacing: 2px;
+    transform: perspective(500px) rotateX(2deg);
+    transition: all 0.3s ease;
+}
+
+.game-title:hover {
+    transform: perspective(500px) rotateX(0deg) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6), 
+                0 0 30px rgba(255, 187, 0, 0.6);
 }
 
 .game-subtitle {
     color: rgb(168, 181, 238);
-    text-shadow: 2px 2px #11468f;
-    padding: 25px;
+    text-shadow: 3px 3px 0px #11468f, 
+                 6px 6px 0px rgba(0, 0, 0, 0.5);
+    padding: 30px;
     text-align: center;
+    font-size: 18px;
+    letter-spacing: 1px;
+    animation: subtitleBounce 1.5s ease-in-out infinite;
 }
 
 .cards,
 .attacks-cards {
     display: flex;
-    gap: 10px;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .champion-cards {
     width: 320px;
-    height: 150px;
-    background: -webkit-linear-gradient(#f3ba78, #af4261);
-    padding: 10px;
-    box-sizing: border-box;
-    border-radius: 20px;
+    height: 180px;
+    background: linear-gradient(135deg, #f3ba78 0%, #af4261 100%);
+    padding: 15px;
+    border-radius: 15px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.champion-cards::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                transparent 70%);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+}
+
+.champion-cards:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(243, 186, 120, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.champion-cards p {
+    font-size: 20px;
+    margin: 10px 0;
+    z-index: 1;
 }
 
 .champion-cards img {
     width: 140px;
+    z-index: 1;
+    filter: drop-shadow(3px 3px 8px rgba(0, 0, 0, 0.5));
 }
 
 #champion-button {
-    width: 200px;
-    height: 50px;
-    border-radius: 10px;
-    background: transparent;
-    border: 2px solid rgb(255, 251, 0);
-    color: rgb(255, 251, 0);
+    width: 220px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgb(255, 251, 0) 0%, rgb(255, 200, 0) 100%);
+    border: 3px solid rgb(200, 160, 0);
+    color: #1a1a1a;
     font-family: "Press Start 2P", sans-serif;
-    font-size: 18px;
+    font-size: 16px;
     margin-top: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4),
+                inset 0 -4px 8px rgba(0, 0, 0, 0.2),
+                0 0 15px rgba(255, 251, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+#champion-button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+    transition: left 0.5s;
+}
+
+#champion-button:hover {
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(255, 251, 0, 0.6);
+}
+
+#champion-button:hover::before {
+    left: 100%;
+}
+
+#champion-button:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
 }
 
 input {
@@ -69,52 +213,139 @@ input {
 }
 
 input:checked + label {
-    background: -webkit-linear-gradient(#237fd4, #f3ba78);
+    background: linear-gradient(135deg, #237fd4 0%, #f3ba78 100%);
+    box-shadow: 0 0 20px rgba(35, 127, 212, 0.6),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
 }
 
 #select-attack {
+    display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+#search-opponent {
+    text-align: center;
+}
+
 .attack-button {
-    background-color: #11468f;
-    padding: 10px;
-    box-sizing: border-box;
-    border-radius: 20px;
-    border-color: transparent;
-    width: 80px;
+    background: linear-gradient(135deg, #11468f 0%, #1a5ba8 100%);
+    padding: 15px;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    width: 90px;
+    height: 90px;
     color: white;
     font-family: "Poppins", sans-serif;
+    font-size: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attack-button:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(26, 91, 168, 0.5),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.attack-button:active {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.attack-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: scale(0.95);
 }
 
 #messages {
-    width: 280px;
-    background: #eeeeee;
-    padding: 20px;
-    margin-top: 20px;
-    border-radius: 20px;
+    width: 320px;
+    background: linear-gradient(135deg, #eeeeee 0%, #d9d9d9 100%);
+    padding: 30px;
+    margin-top: 30px;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     flex-direction: column;
     font-family: "Poppins", sans-serif;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    animation: slideUp 0.6s ease-out;
+}
+
+#messages p {
+    font-size: 16px;
+    font-weight: bold;
+    color: #11468f;
+    margin: 10px 0;
+}
+
+#score {
+    font-size: 20px;
+    animation: scoreFlash 0.6s ease;
 }
 
 #restart-button {
     border: none;
     color: #11468f;
+    background: linear-gradient(135deg, #ffbb00 0%, #ff9f00 100%);
+    cursor: pointer;
+    font-family: "Press Start 2P", sans-serif;
+    padding: 15px 25px;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+#restart-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(255, 187, 0, 0.5);
+}
+
+#restart-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .attacks {
     display: grid;
-    grid-template-columns: 100px 100px;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
     color: white;
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1);
 }
 
 #player-life,
 #enemy-life {
-    font-size: 32px;
-    margin-bottom: 0;
+    font-size: 36px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
 .player-skills,
@@ -122,23 +353,83 @@ input:checked + label {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#player-champion,
+#enemy-champion {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffbb00;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin: 10px 0;
 }
 
 #see-map {
+    display: flex;
     flex-direction: column;
-
     align-items: center;
     justify-content: center;
 }
+
+#map {
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(255, 187, 0, 0.3);
+    border: 3px solid rgba(255, 187, 0, 0.5);
+    margin: 20px 0;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#see-map > div {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
 #see-map button {
-    width: 80px;
-    height: 40px;
-    border-radius: 20px;
-    background: transparent;
+    width: 90px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
     border: 2px solid white;
     color: white;
     font-family: "Press Start 2P", sans-serif;
-    margin: 10px 0;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    letter-spacing: 1px;
+}
+
+.movement-btn {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.movement-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5),
+                0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.movement-btn:active {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0.95);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 #signature {
@@ -147,19 +438,269 @@ input:checked + label {
     justify-content: center;
     padding: 50px;
     text-align: center;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+    font-size: 14px;
+    animation: glow 2s ease-in-out infinite;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+.cancel-btn {
+    width: 200px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #d32f2f 0%, #ff5252 100%);
+    border: 2px solid #ff6666;
+    color: white;
+    font-family: 'Press Start 2P', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    margin-top: 40px;
+    box-shadow: 0 6px 12px rgba(211, 47, 47, 0.4),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: 1px;
+}
+
+.cancel-btn:hover {
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 10px 20px rgba(211, 47, 47, 0.6),
+                0 0 15px rgba(255, 82, 82, 0.5);
+}
+
+.cancel-btn:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 8px rgba(211, 47, 47, 0.4),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#timer-text {
+    animation: timerPulse 1s ease-in-out infinite;
+}
+
+/* ====== ANIMATIONS ====== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes titleGlow {
+    0%, 100% {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 
+                    0 0 20px rgba(255, 187, 0, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 
+                    0 0 30px rgba(255, 187, 0, 0.7);
+    }
+}
+
+@keyframes subtitleBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes shine {
+    0% {
+        left: -50%;
+    }
+    100% {
+        left: 150%;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scoreFlash {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5),
+                     0 0 10px rgba(75, 247, 104, 0.3);
+    }
+    50% {
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5),
+                     0 0 20px rgba(75, 247, 104, 0.6);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes sectionFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes timerPulse {
+    0%, 100% {
+        transform: scale(1);
+        color: rgb(168, 181, 238);
+    }
+    50% {
+        transform: scale(1.05);
+        color: #ff6666;
+    }
+}
+
+/* ====== RESPONSIVE ====== */
+
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
+
+    .game-title {
+        font-size: 24px;
+        padding: 15px 20px;
+    }
+
+    .game-subtitle {
+        font-size: 16px;
+        padding: 20px;
+    }
+
+    .champion-cards {
+        width: 280px;
+        height: 160px;
+    }
+
+    #champion-button {
+        width: 180px;
+        height: 50px;
+        font-size: 14px;
+    }
+
+    .attack-button {
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+    }
+
+    .attacks {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
 
 @media (max-width: 480px) {
     body {
-        padding: 0%;
-        box-sizing: border-box;
+        padding: 10px;
+        background-attachment: scroll;
+        background-size: cover;
     }
-}
 
-@media (max-width: 1000px) {
+    section {
+        min-height: auto;
+        padding: 20px 0;
+    }
+
+    .game-title {
+        font-size: 18px;
+        padding: 10px 15px;
+    }
+
+    .game-subtitle {
+        font-size: 14px;
+        padding: 15px;
+    }
+
     .cards,
     .attacks-cards {
+        gap: 10px;
         flex-direction: column;
+    }
+
+    .champion-cards {
+        width: 100%;
+        max-width: 280px;
+        height: 140px;
+    }
+
+    #champion-button {
+        width: 150px;
+        height: 45px;
+        font-size: 12px;
+    }
+
+    #messages {
+        width: 90%;
+        max-width: 300px;
+        padding: 20px;
+    }
+
+    .attack-button {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+    }
+
+    #player-life,
+    #enemy-life {
+        font-size: 28px;
+    }
+
+    #see-map button {
+        width: 70px;
+        height: 45px;
+        font-size: 10px;
+    }
+
+    #signature {
+        padding: 30px;
+        font-size: 12px;
     }
 }
 

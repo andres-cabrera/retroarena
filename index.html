@@ -5,53 +5,78 @@
         <title>RETRO ARENA</title>
         <link rel="stylesheet" href="./styles.css" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Retro Arena - Multiplayer RPG Battle Game" />
     </head>
     <body>
+        <video id="bg-video" autoplay muted loop style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; background-color: rgba(143, 17, 17, 0.8);">
+            <source src="./assets/background.mp4" type="video/mp4">
+        </video>
         <section id="select-champion">
-            <h1 class="game-title" class="">RETRO ARENA</h1>
+            <h1 class="game-title">RETRO ARENA</h1>
 
             <h2 class="game-subtitle">Select your Champion:</h2>
 
             <div id="cardsContainer" class="cards"></div>
 
-            <button id="champion-button">SELECT</button>
+            <button id="champion-button" aria-label="Select champion">SELECT</button>
+        </section>
+
+        <section id="search-opponent" style="display: none;">
+            <h1 class="game-title">Searching for Opponent...</h1>
+            
+            <div style="text-align: center; padding: 40px;">
+                <p class="game-subtitle" id="timer-text">Time left: 120s</p>
+                <p class="game-subtitle" style="color: rgb(168, 181, 238); font-size: 16px;">Waiting for another player to connect...</p>
+                <div style="margin-top: 30px;">
+                    <div style="display: inline-block; font-size: 48px; animation: spin 2s linear infinite;">⚔️</div>
+                </div>
+                <button id="cancel-search" class="cancel-btn" aria-label="Cancel search">Cancel</button>
+            </div>
         </section>
 
         <section id="see-map">
-            <h2 class="game-title" class="">
+            <h2 class="game-title">
                 Walk the map with your Champion!
             </h2>
             <canvas id="map"></canvas>
             <button
+                class="movement-btn"
                 onmouseup="stopMovement()"
                 onmousedown="moveUp()"
                 ontouchstart="moveUp()"
                 ontouchend="stopMovement()"
+                aria-label="Move up"
             >
                 UP
             </button>
             <div>
                 <button
+                    class="movement-btn"
                     onmouseup="stopMovement()"
                     onmousedown="moveLeft()"
                     ontouchstart="moveLeft()"
                     ontouchend="stopMovement()"
+                    aria-label="Move left"
                 >
                     LEFT
                 </button>
                 <button
+                    class="movement-btn"
                     onmouseup="stopMovement()"
                     onmousedown="moveDown()"
                     ontouchstart="moveDown()"
                     ontouchend="stopMovement()"
+                    aria-label="Move down"
                 >
                     DOWN
                 </button>
                 <button
+                    class="movement-btn"
                     onmouseup="stopMovement()"
                     onmousedown="moveRight()"
                     ontouchstart="moveRight()"
                     ontouchend="stopMovement()"
+                    aria-label="Move right"
                 >
                     RIGHT
                 </button>
@@ -59,7 +84,7 @@
         </section>
 
         <section id="select-attack">
-            <h1 class="game-title" class="">Warriors, Mages and Rogues</h1>
+            <h1 class="game-title">Warriors, Mages and Rogues</h1>
 
             <h2 class="game-subtitle">Select your attack:</h2>
 
@@ -69,7 +94,7 @@
                 <p id="score">Good Luck!</p>
 
                 <section id="restart">
-                    <p id="restart-button">Restart</p>
+                    <button id="restart-button" aria-label="Restart game">Restart</button>
                 </section>
             </div>
 
@@ -88,7 +113,7 @@
         </section>
         <footer>
             <div id="signature">
-                <marquee direction="right">Powered by andres-cabrera</marquee> 
+                <p>Powered by andres-cabrera</p>
             </div>
         </footer>
         <script src="./retro-arena.js"></script>
